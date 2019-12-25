@@ -7,12 +7,15 @@ public class GridButtonContainer extends GridLayout {
     static int outOfValueI;
     static int outOfValueJ;
 
-    int oluSayaci;
-    int diriSayaci;
-
     public MyButton[][] cellButtons = new MyButton[8][8];
-
     int length = cellButtons.length;
+
+    YasamHesaplayaci yasamHesaplayaci = new YasamHesaplayaci();
+    KenarBulucu kenarBulucu = new KenarBulucu(yasamHesaplayaci);
+    KoseBulucu koseBulucu = new KoseBulucu(yasamHesaplayaci);
+    OrtaTarafBulucu ortaTarafBulucu = new OrtaTarafBulucu(yasamHesaplayaci);
+
+    KontrolEdici kontrolEdici = new KontrolEdici();
 
     public GridButtonContainer() {
         super(8, 8);
@@ -69,32 +72,36 @@ public class GridButtonContainer extends GridLayout {
                         outOfValueI = finalI;
                         outOfValueJ = finalJ;
 
-                        if (koseMi(length)) {
-                            if (sagUstKosedeMi(length))
-                                sagUstKoseBul();
-                            else if (solUstKosedeMi())
-                                solUstKoseBul();
-                            else if (sagAltKosedeMi(length))
-                                sagAltKoseBul();
-                            else if (solAltKosedeMi(length))
-                                solAltKoseBul();
-                        } else if (kenarMı(length)) {
-                            if (altKenarMi(length))
-                                altKenarBul();
-                            else if (sagKenarMi(length))
-                                sagKenarBul();
-                            else if (ustKenarMi())
-                                ustKenarBul();
-                            else if (solKenarMi())
-                                solKenarBul();
+                        if (kontrolEdici.koseMi(length, outOfValueI, outOfValueJ)) {
+
+                            if (kontrolEdici.sagUstKosedeMi(length, outOfValueI, outOfValueJ))
+                                koseBulucu.sagUstKoseBul(outOfValueI, outOfValueJ, cellButtons);
+                            else if (kontrolEdici.solUstKosedeMi(outOfValueI, outOfValueJ))
+                                koseBulucu.solUstKoseBul(outOfValueI, outOfValueJ, cellButtons);
+                            else if (kontrolEdici.sagAltKosedeMi(length, outOfValueI, outOfValueJ))
+                                koseBulucu.sagAltKoseBul(outOfValueI, outOfValueJ, cellButtons);
+                            else if (kontrolEdici.solAltKosedeMi(length, outOfValueI, outOfValueJ))
+                                koseBulucu.solAltKoseBul(outOfValueI, outOfValueJ, cellButtons);
+
+                        } else if (kontrolEdici.kenarMı(length, outOfValueI, outOfValueJ)) {
+
+                            if (kontrolEdici.altKenarMi(length, outOfValueI))
+                                kenarBulucu.altKenarBul(outOfValueI, outOfValueJ,cellButtons);
+                            else if (kontrolEdici.sagKenarMi(length, outOfValueJ))
+                                kenarBulucu.sagKenarBul(outOfValueI, outOfValueJ, cellButtons);
+                            else if (kontrolEdici.ustKenarMi(outOfValueI))
+                                kenarBulucu.ustKenarBul(outOfValueI, outOfValueJ, cellButtons);
+                            else if (kontrolEdici.solKenarMi(outOfValueJ))
+                                kenarBulucu.solKenarBul(outOfValueI, outOfValueJ, cellButtons);
+
                         } else {
-                            solTarafBul();
-                            ustTarafiBul();
-                            sagTarafiBul();
-                            altTarafiBul();
+                            ortaTarafBulucu.solTarafBul(outOfValueI, outOfValueJ, cellButtons);
+                            ortaTarafBulucu.ustTarafiBul(outOfValueI, outOfValueJ, cellButtons);
+                            ortaTarafBulucu.sagTarafiBul(outOfValueI, outOfValueJ, cellButtons);
+                            ortaTarafBulucu.altTarafiBul(outOfValueI, outOfValueJ, cellButtons);
                         }
 
-                        if (diriSayaci >= 3) {
+                        if (yasamHesaplayaci.getDiriSayaci() >= 3) {
                             cellButtons[finalI][finalJ].setStyleName(ValoTheme.BUTTON_FRIENDLY);
                         } else {
                             cellButtons[finalI][finalJ].setStyleName(ValoTheme.BUTTON_DANGER);
@@ -102,8 +109,8 @@ public class GridButtonContainer extends GridLayout {
                             cellButtons[finalI][finalJ].setCaption(cellButtons[finalI][finalJ].getData().toString());
                         }
 
-                        oluSayaci = 0;
-                        diriSayaci = 0;
+                        yasamHesaplayaci.setDiriSayaci(0);
+                        yasamHesaplayaci.setOluSayaci(0);
                     }
                 });
             }
@@ -112,235 +119,5 @@ public class GridButtonContainer extends GridLayout {
     }
 
 
-    private void solTarafBul() {
-        for (int i = outOfValueI - 1; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ - 1; j < outOfValueJ; j++) {
-                    yasamHesapla(cellButtons[i][j]);
-                }
-
-            }
-    }
-
-    private void ustTarafiBul() {
-        for (int i = outOfValueI - 1; i < outOfValueI; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ + 1; j++) {
-                    yasamHesapla(cellButtons[i][j]);
-                }
-        }
-    }
-
-    private void sagTarafiBul() {
-        for (int i = outOfValueI - 1; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ + 1; j < outOfValueJ + 2; j++) {
-                    yasamHesapla(cellButtons[i][j]);
-                }
-
-        }
-    }
-
-    private void altTarafiBul() {
-        for (int i = outOfValueI + 1; i < outOfValueI + 2; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ + 1; j++) {
-                    yasamHesapla(cellButtons[i][j]);
-                }
-            }
-    }
-
-    private boolean solAltKosedeMi(int length) {
-        if (outOfValueI == (length - 1) && outOfValueJ == 0)
-            return true;
-        else
-            return false;
-    }
-
-    private boolean solUstKosedeMi() {
-        if (outOfValueI == 0 && outOfValueJ == 0)
-            return true;
-        else
-            return false;
-    }
-
-    private boolean sagUstKosedeMi(int length) {
-        if (outOfValueI == 0 && outOfValueJ == (length - 1))
-            return true;
-        else
-            return false;
-    }
-
-    private boolean sagAltKosedeMi(int length) {
-        if (outOfValueI == (length - 1) && outOfValueJ == (length - 1))
-            return true;
-        else
-            return false;
-    }
-
-    private void solAltKoseBul() {
-            for (int i = outOfValueI - 1; i < outOfValueI; i++) {
-                for (int j = outOfValueJ; j <= outOfValueJ + 1; j++) {
-                    yasamHesapla(cellButtons[i][j]);
-                }
-            }
-            for (int i = outOfValueI - 1; i <= outOfValueI; i++) {
-                for (int j = outOfValueJ + 1; j < outOfValueJ + 2; j++) {
-                    yasamHesapla(cellButtons[i][j]);
-                }
-            }
-    }
-
-    private void sagAltKoseBul() {
-        for (int i = outOfValueI - 1; i < outOfValueI; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI - 1; i <= outOfValueI; i++) {
-            for (int j = outOfValueJ - 1; j < outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-
-    }
-
-    private void sagUstKoseBul() {
-        for (int i = outOfValueI; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ - 1; j < outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI + 1; i < outOfValueI + 2; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-    }
-
-    private void solUstKoseBul() {
-        for (int i = outOfValueI + 1; i < outOfValueI + 2; i++) {
-            for (int j = outOfValueJ; j <= outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ + 1; j < outOfValueJ + 2; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-    }
-
-
-    private boolean kenarMı(int length) {
-        if (!koseMi(length)) {
-            if (altKenarMi(length) || sagKenarMi(length) || ustKenarMi() || solKenarMi()) {
-                return true;
-            } else return false;
-        } else return false;
-    }
-
-    private boolean sagKenarMi(int length) {
-        return outOfValueJ == (length - 1);
-    }
-
-    private boolean altKenarMi(int length) {
-        return outOfValueI == (length - 1);
-    }
-
-    private boolean ustKenarMi() {
-        return outOfValueI == 0;
-    }
-
-    private boolean solKenarMi() {
-        return outOfValueJ == 0;
-    }
-
-    private boolean koseMi(int length) {
-        if (solAltKosedeMi(length) || solUstKosedeMi() || sagAltKosedeMi(length) || sagUstKosedeMi(length))
-            return true;
-        else return false;
-    }
-
-
-    public void altKenarBul() {
-        for (int i = outOfValueI - 1; i <= outOfValueI; i++) {
-            for (int j = outOfValueJ - 1; j < outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI - 1; i < outOfValueI; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ + 1; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-
-        for (int i = outOfValueI - 1; i <= outOfValueI; i++) {
-            for (int j = outOfValueJ + 1; j < outOfValueJ + 2; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-    }
-
-    public void sagKenarBul() {
-        for (int i = outOfValueI - 1; i < outOfValueI; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI - 1; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ - 1; j < outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-
-        for (int i = outOfValueI + 1; i < outOfValueI + 2; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-    }
-
-    private void yasamHesapla(MyButton myButton) {
-        myButton.setCaption(myButton.getData().toString());
-        if (myButton.getData().equals(0)) {
-            oluSayaci++;
-        } else
-            diriSayaci++;
-    }
-
-    public void ustKenarBul() {
-        for (int i = outOfValueI; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ - 1; j < outOfValueJ; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI + 1; i < outOfValueI + 2; i++) {
-            for (int j = outOfValueJ - 1; j <= outOfValueJ + 1; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-
-        for (int i = outOfValueI; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ + 1; j < outOfValueJ + 2; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-    }
-
-    public void solKenarBul() {
-        for (int i = outOfValueI - 1; i < outOfValueI; i++) {
-            for (int j = outOfValueJ; j <= outOfValueJ + 1; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-        for (int i = outOfValueI - 1; i <= outOfValueI + 1; i++) {
-            for (int j = outOfValueJ + 1; j < outOfValueJ + 2; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-
-        for (int i = outOfValueI + 1; i < outOfValueI + 2; i++) {
-            for (int j = outOfValueJ; j <= outOfValueJ + 1; j++) {
-                yasamHesapla(cellButtons[i][j]);
-            }
-        }
-    }
 
 }
